@@ -1,24 +1,14 @@
-export const searchRestaurants =
-  async () => {
-    return [
-      {
-        name:
-          "Vegetarian Tokyo",
-        cuisine:
-          "Indian Vegetarian"
-      },
+export const searchRestaurants = async (trip) => {
+  const prompt = `
+You are a restaurant recommendation agent.
 
-      {
-        name:
-          "Green Leaf Cafe",
-        cuisine: "Vegan"
-      },
+Trip Details:
+${JSON.stringify(trip, null, 2)}
 
-      {
-        name:
-          "Spice Garden",
-        cuisine:
-          "Indian Cuisine"
-      }
-    ];
-  };
+Recommend restaurants based on:
+- Destination
+- Dietary requirements
+- Budget
+
+Return JSON only.
+`;}

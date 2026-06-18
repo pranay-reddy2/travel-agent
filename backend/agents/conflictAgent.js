@@ -11,9 +11,29 @@ function timeToMinutes(
   );
 }
 
-export const detectConflicts = (
-  itinerary
-) => {
+export const detectConflicts =
+(itinerary) => {
+
+  if (!itinerary) {
+    console.log(
+      "No itinerary found"
+    );
+
+    return [];
+  }
+
+  if (
+    !itinerary.selectedFlight ||
+    !itinerary.selectedHotel
+  ) {
+
+    console.log(
+      "Missing flight or hotel"
+    );
+
+    return [];
+  }
+
   const conflicts = [];
 
   const arrival =
@@ -21,13 +41,11 @@ export const detectConflicts = (
       .arrival;
 
   const checkIn =
-    itinerary.days[0]
-      .events[2].time;
+    itinerary.selectedHotel
+      .checkIn;
 
-  if (
-    timeToMinutes(arrival) >
-    timeToMinutes(checkIn)
-  ) {
+  if (arrival > checkIn) {
+
     conflicts.push({
       type:
         "Hotel Check-In Conflict",
@@ -36,10 +54,10 @@ export const detectConflicts = (
         "Hotel check-in occurs before flight arrival",
 
       arrival,
-
       checkIn,
 
-      severity: "medium"
+      severity:
+        "medium"
     });
   }
 

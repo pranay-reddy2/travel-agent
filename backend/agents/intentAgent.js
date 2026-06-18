@@ -1,17 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
-);
+import { model } from "../utils/gemini.js";
 
 export const parseTravelBrief = async (
   brief
 ) => {
   try {
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-1.5-flash"
-      });
 
     const prompt = `
 Extract travel information from the text.

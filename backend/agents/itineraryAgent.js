@@ -1,3 +1,5 @@
+import { model } from "../utils/gemini.js";
+
 export const buildItinerary = async ({
   trip,
   flights,
@@ -6,140 +8,158 @@ export const buildItinerary = async ({
   restaurants,
   transport
 }) => {
-  const selectedFlight = flights[0];
-  const selectedHotel = hotels[0];
-  const selectedRestaurant =
-    restaurants[0];
-  const selectedTransport =
-    transport[0];
+  try {
 
-  return {
-    generatedAt:
-      new Date().toISOString(),
+    const prompt = `
+You are an expert travel itinerary planner.
 
-    trip,
+Trip Details:
+${JSON.stringify(trip, null, 2)}
 
-    selectedFlight,
+Available Flights:
+${JSON.stringify(flights, null, 2)}
 
-    selectedHotel,
+Available Hotels:
+${JSON.stringify(hotels, null, 2)}
 
-    selectedRestaurant,
+Available Activities:
+${JSON.stringify(activities, null, 2)}
 
-    selectedTransport,
+Available Restaurants:
+${JSON.stringify(restaurants, null, 2)}
 
-    budget: {
-      totalBudget:
-        trip.budget || 150000,
+Available Transport:
+${JSON.stringify(transport, null, 2)}
 
-      flightCost:
-        selectedFlight.price,
+Your tasks:
 
-      hotelCost:
-        selectedHotel.pricePerNight *
-        5
-    },
+1. Choose the best flight.
+2. Choose the best hotel.
+3. Choose the best restaurant.
+4. Choose the best transport.
+5. Create a complete day-by-day itinerary.
+6. Stay within budget.
+7. Avoid scheduling conflicts.
 
-    days: [
-      {
-        day: 1,
-        title: "Arrival Day",
+Return ONLY valid JSON.
 
-        events: [
-          {
-            time: "08:00",
-            type: "Flight",
-            title:
-              "Departure"
-          },
+{
+  "generatedAt": "",
+  "trip": {},
+  "selectedFlight": {},
+  "selectedHotel": {},
+  "selectedRestaurant": {},
+  "selectedTransport": {},
+  "budget": {
+    "totalBudget": 0,
+    "flightCost": 0,
+    "hotelCost": 0,
+    "remaining": 0
+  },
+  "days": [
+    {
+      "day": 1,
+      "title": "",
+      "events": [
+        {
+          "time": "",
+          "type": "",
+          "title": ""
+        }
+      ]
+    }
+  ]
+}
 
-          {
-            time:
-              selectedFlight.arrival,
+DO NOT return markdown.
+DO NOT return explanations.
+ONLY return JSON.
+`;
 
-            type: "Flight",
+    const result =
+      await model.generateContent(
+        prompt
+      );
 
-            title:
-              "Arrive at Destination"
-          },
+    let text =
+      result.response.text();
 
-          {
-            time: "14:00",
+    console.log(
+      "ITINERARY RAW RESPONSE:"
+    );
 
-            type: "Hotel",
+    console.log(text);
 
-            title:
-              "Hotel Check-in"
-          },
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-          {
-            time: "19:00",
+    const jsonStart =
+      text.indexOf("{");
 
-            type:
-              "Restaurant",
+    const jsonEnd =
+      text.lastIndexOf("}");
 
-            title:
-              selectedRestaurant.name
-          }
-        ]
+    if (
+      jsonStart === -1 ||
+      jsonEnd === -1
+    ) {
+      throw new Error(
+        "No JSON object found"
+      );
+    }
+
+    const jsonText =
+      text.substring(
+        jsonStart,
+        jsonEnd + 1
+      );
+
+    const itinerary =
+      JSON.parse(jsonText);
+
+    return itinerary;
+
+  } catch (error) {
+
+    console.log(
+      "Itinerary Agent Error:",
+      error.message
+    );
+
+    return {
+      generatedAt:
+        new Date().toISOString(),
+
+      trip,
+
+      selectedFlight:
+        flights?.[0] || {},
+
+      selectedHotel:
+        hotels?.[0] || {},
+
+      selectedRestaurant:
+        restaurants?.[0] || {},
+
+      selectedTransport:
+        transport?.[0] || {},
+
+      budget: {
+        totalBudget:
+          trip?.budget || 0,
+
+        flightCost:
+          flights?.[0]?.price || 0,
+
+        hotelCost:
+          (hotels?.[0]?.pricePerNight || 0) * 5,
+
+        remaining: 0
       },
 
-      {
-        day: 2,
-
-        title:
-          "City Exploration",
-
-        events: [
-          {
-            time: "09:00",
-
-            type:
-              "Activity",
-
-            title:
-              activities[0]?.name
-          },
-
-          {
-            time: "13:00",
-
-            type:
-              "Activity",
-
-            title:
-              activities[1]?.name
-          }
-        ]
-      },
-
-      {
-        day: 3,
-
-        title:
-          "Attractions",
-
-        events: [
-          {
-            time: "10:00",
-
-            type:
-              "Activity",
-
-            title:
-              activities[2]?.name
-          },
-
-          {
-            time: "15:00",
-
-            type:
-              "Activity",
-
-            title:
-              activities[3]?.name
-          }
-        ]
-      }
-    ]
-  };
+      days: []
+    };
+  }
 };

@@ -1,26 +1,20 @@
-export default function HotelCard({
-  hotel
-}) {
+export default function HotelCard({ hotel = {} }) {
   return (
-    <div className="border p-4 rounded">
+    <div className="bg-white p-5 rounded-xl shadow">
+      <h2 className="text-lg font-bold mb-3">
+        🏨 Hotel
+      </h2>
 
-      <h3 className="font-bold">
-        🏨 {hotel.name}
-      </h3>
-
-      <p>
-        ⭐ {hotel.rating}
+      <p className="font-medium">
+        {hotel.name || "Not Available"}
       </p>
 
-      <p>
-        ₹
-        {hotel.pricePerNight}
-        /night
+      <p className="text-gray-600 mt-2">
+        Estimated Cost
       </p>
 
-      <p>
-        Booking:
-        {hotel.bookingId}
+      <p className="text-2xl font-bold text-green-600">
+        ₹{hotel.estimatedCost || 0}
       </p>
     </div>
   );

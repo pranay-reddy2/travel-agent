@@ -10,12 +10,12 @@ import { searchTransport } from "../agents/transportAgent.js";
 import { buildItinerary } from "../agents/itineraryAgent.js";
 
 import {
-  detectConflicts,
-  resolveConflicts
+    detectConflicts,
+    resolveConflicts
 } from "../agents/conflictAgent.js";
 
 import {
-  processChangeRequest
+    processChangeRequest
 } from "../agents/changeAgent.js";
 
 const router = express.Router();
@@ -25,125 +25,138 @@ POST /api/travel/plan
 */
 
 router.post(
-  "/plan",
-  async (req, res) => {
-    try {
-      const { brief } = req.body;
+    "/plan",
+    async (req, res) => {
+        try {
+            const { brief } = req.body;
 
-      if (!brief) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Travel brief required"
-        });
-      }
+            if (!brief) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Travel brief required"
+                });
+            }
 
-      /*
-      STEP 1
-      Extract requirements
-      */
+            /*
+            STEP 1
+            Extract requirements
+            */
 
-      const parsedBrief =
-        await parseTravelBrief(
-          brief
-        );
+            const parsedBrief =
+                await parseTravelBrief(
+                    brief
+                );
 
-      /*
-      STEP 2
-      Parallel searches
-      */
+            /*
+            STEP 2
+            Parallel searches
+            */
 
-      const [
-        flights,
-        hotels,
-        activities,
-        restaurants,
-        transport
-      ] = await Promise.all([
-        searchFlights(
-          parsedBrief
-        ),
-        searchHotels(
-          parsedBrief
-        ),
-        searchActivities(
-          parsedBrief
-        ),
-        searchRestaurants(
-          parsedBrief
-        ),
-        searchTransport(
-          parsedBrief
-        )
-      ]);
+            const [
+                flights,
+                hotels,
+                activities,
+                restaurants,
+                transport
+            ] = await Promise.all([
+                searchFlights(
+                    parsedBrief
+                ),
+                searchHotels(
+                    parsedBrief
+                ),
+                searchActivities(
+                    parsedBrief
+                ),
+                searchRestaurants(
+                    parsedBrief
+                ),
+                searchTransport(
+                    parsedBrief
+                )
+            ]);
 
-      /*
-      STEP 3
-      Build itinerary
-      */
+            /*
+            STEP 3
+            Build itinerary
+            */
 
-      const itinerary =
-        await buildItinerary({
-          trip: parsedBrief,
-          flights,
-          hotels,
-          activities,
-          restaurants,
-          transport
-        });
+            const itinerary =
+                await buildItinerary({
+                    trip: parsedBrief,
+                    flights,
+                    hotels,
+                    activities,
+                    restaurants,
+                    transport
+                });
 
-      /*
-      STEP 4
-      Detect conflicts
-      */
+            console.log(
+                "ITINERARY GENERATED:",
+                itinerary
+            );
+            if (!itinerary) {
 
-      const conflicts =
-        detectConflicts(
-          itinerary
-        );
+                return res.status(500).json({
+                    success: false,
+                    message:
+                        "Itinerary generation failed"
+                });
 
-      /*
-      STEP 5
-      Auto resolve
-      */
+            }
+            /*
+            STEP 4
+            Detect conflicts
+            */
 
-      const resolved =
-        resolveConflicts(
-          itinerary,
-          conflicts
-        );
+            const conflicts =
+                detectConflicts(
+                    itinerary
+                );
 
-      return res.json({
-        success: true,
+            /*
+            STEP 5
+            Auto resolve
+            */
 
-        tripDetails:
-          parsedBrief,
+            const resolved =
+                resolveConflicts(
+                    itinerary,
+                    conflicts
+                );
 
-        options: {
-          flights,
-          hotels,
-          activities,
-          restaurants,
-          transport
-        },
+            return res.json({
+                success: true,
 
-        conflicts,
+                tripDetails:
+                    parsedBrief,
 
-        finalItinerary:
-          resolved
-      });
-    } catch (error) {
-      console.error(error);
+                options: {
+                    flights,
+                    hotels,
+                    activities,
+                    restaurants,
+                    transport
+                },
 
-      return res.status(500).json({
-        success: false,
-        message:
-          "Failed to create itinerary",
-        error:
-          error.message
-      });
+                conflicts,
+
+                finalItinerary:
+                    resolved
+            });
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Failed to create itinerary",
+                error:
+                    error.message
+            });
+        }
     }
-  }
 );
 
 /*
@@ -151,34 +164,34 @@ POST /api/travel/change
 */
 
 router.post(
-  "/change",
-  async (req, res) => {
-    try {
-      const {
-        itinerary,
-        request
-      } = req.body;
+    "/change",
+    async (req, res) => {
+        try {
+            const {
+                itinerary,
+                request
+            } = req.body;
 
-      const response =
-        await processChangeRequest(
-          itinerary,
-          request
-        );
+            const response =
+                await processChangeRequest(
+                    itinerary,
+                    request
+                );
 
-      return res.json({
-        success: true,
-        ...response
-      });
-    } catch (error) {
-      console.error(error);
+            return res.json({
+                success: true,
+                ...response
+            });
+        } catch (error) {
+            console.error(error);
 
-      return res.status(500).json({
-        success: false,
-        error:
-          error.message
-      });
+            return res.status(500).json({
+                success: false,
+                error:
+                    error.message
+            });
+        }
     }
-  }
 );
 
 /*
@@ -186,10 +199,10 @@ GET /api/travel/demo
 */
 
 router.get(
-  "/demo",
-  async (req, res) => {
-    try {
-      const sampleBrief = `
+    "/demo",
+    async (req, res) => {
+        try {
+            const sampleBrief = `
 Plan a trip from Bangalore to Tokyo.
 
 Dates:
@@ -209,79 +222,79 @@ Vegetarian food nearby
 Near metro station
 `;
 
-      const parsedBrief =
-        await parseTravelBrief(
-          sampleBrief
-        );
+            const parsedBrief =
+                await parseTravelBrief(
+                    sampleBrief
+                );
 
-      const [
-        flights,
-        hotels,
-        activities,
-        restaurants,
-        transport
-      ] = await Promise.all([
-        searchFlights(
-          parsedBrief
-        ),
-        searchHotels(
-          parsedBrief
-        ),
-        searchActivities(
-          parsedBrief
-        ),
-        searchRestaurants(
-          parsedBrief
-        ),
-        searchTransport(
-          parsedBrief
-        )
-      ]);
+            const [
+                flights,
+                hotels,
+                activities,
+                restaurants,
+                transport
+            ] = await Promise.all([
+                searchFlights(
+                    parsedBrief
+                ),
+                searchHotels(
+                    parsedBrief
+                ),
+                searchActivities(
+                    parsedBrief
+                ),
+                searchRestaurants(
+                    parsedBrief
+                ),
+                searchTransport(
+                    parsedBrief
+                )
+            ]);
 
-      const itinerary =
-        await buildItinerary({
-          trip: parsedBrief,
-          flights,
-          hotels,
-          activities,
-          restaurants,
-          transport
-        });
+            const itinerary =
+                await buildItinerary({
+                    trip: parsedBrief,
+                    flights,
+                    hotels,
+                    activities,
+                    restaurants,
+                    transport
+                });
 
-      const conflicts =
-        detectConflicts(
-          itinerary
-        );
+            const conflicts =
+                detectConflicts(
+                    itinerary
+                );
 
-      const resolved =
-        resolveConflicts(
-          itinerary,
-          conflicts
-        );
+            const resolved =
+                resolveConflicts(
+                    itinerary,
+                    conflicts
+                );
 
-      return res.json({
-        success: true,
-        tripDetails:
-          parsedBrief,
-        options: {
-          flights,
-          hotels,
-          activities,
-          restaurants,
-          transport
-        },
-        conflicts,
-        finalItinerary:
-          resolved
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error:
-          error.message
-      });
+            return res.json({
+                success: true,
+                tripDetails:
+                    parsedBrief,
+                options: {
+                    flights,
+                    hotels,
+                    activities,
+                    restaurants,
+                    transport
+                },
+                conflicts,
+                finalItinerary:
+                    resolved
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                error:
+                    error.message
+            });
+        }
     }
-  }
 );
 
 export default router;

@@ -1,32 +1,63 @@
 export default function ConflictPanel({
-  conflicts
+  conflicts,
+  resolutions = []
 }) {
   return (
     <div className="bg-white p-5 rounded shadow">
 
-      <h2 className="font-bold mb-3">
-        Conflicts
+      <h2 className="font-bold text-lg mb-4">
+        ⚠ Conflict Resolution
       </h2>
 
       {conflicts.map(
+        (conflict, index) => (
+          <div
+            key={index}
+            className="border rounded p-3 mb-3 bg-red-50"
+          >
+            <p>
+              <strong>
+                Issue:
+              </strong>{" "}
+              {conflict.issue}
+            </p>
+
+            <p>
+              <strong>
+                Severity:
+              </strong>{" "}
+              {
+                conflict.severity
+              }
+            </p>
+          </div>
+        )
+      )}
+
+      {resolutions.map(
         (
-          conflict,
+          resolution,
           index
         ) => (
           <div
             key={index}
-            className="bg-red-100 p-3 rounded mb-2"
+            className="border rounded p-3 bg-green-50"
           >
             <p>
+              <strong>
+                Fix:
+              </strong>{" "}
               {
-                conflict.issue
+                resolution.action
               }
             </p>
 
             <p>
-              Severity:
+              <strong>
+                Status:
+              </strong>{" "}
               {
-                conflict.severity
+                resolution.status
               }
             </p>
           </div>
