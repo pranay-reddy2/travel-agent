@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sand-50 text-espresso-900 font-sans antialiased;
+  background-image: radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(200, 134, 90, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at -10% 10%, rgba(107, 115, 85, 0.07), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  @apply bg-sand-200/70 rounded-lg;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #dcc9ac;
+  border-radius: 999px;
+  border: 2px solid #fbf8f3;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c8865a;
+}

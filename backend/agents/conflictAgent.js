@@ -82,9 +82,16 @@ export const resolveConflicts =
           conflict.type ===
           "Hotel Check-In Conflict"
         ) {
-          updated.days[0]
-            .events[2].time =
-            "19:00";
+          if (
+            updated.days &&
+            updated.days[0] &&
+            updated.days[0].events &&
+            updated.days[0].events[2]
+          ) {
+            updated.days[0]
+              .events[2].time =
+              "19:00";
+          }
 
           resolutions.push({
             issue:
