@@ -1,31 +1,46 @@
-// API base. In dev, Vite proxies /api -> http://localhost:5000 (see vite.config.js).
-// To hit the backend directly, set VITE_API_BASE in a .env file, e.g.
-//   VITE_API_BASE=http://localhost:5000
-const API_BASE = import.meta.env.VITE_API_BASE || ''
+// API base. In dev, Vite proxies /api -> http://localhost:5000
+
+const API_BASE = (
+  import.meta.env.VITE_API_BASE || ""
+).replace(/\/+$/, "");
 
 export async function planTrip(brief) {
-  const res = await fetch(`${API_BASE}api/travel/plan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ brief }),
-  })
+  const url = `${API_BASE}/api/travel/plan`;
 
-  let data = null
+  console.log("Calling API:", url);
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ brief }),
+  });
+
+  let data = null;
+
   try {
-    data = await res.json()
-  } catch {
-    // backend returned non-JSON (e.g. crash HTML)
+    data = await res.json();
+  } catch (err) {
+    console.error("Response is not JSON:", err);
   }
 
   if (!res.ok) {
     const msg =
-      (data && (data.error || data.message)) ||
-      `Server error (${res.status}). The AI service may be overloaded — try again.`
-    const err = new Error(msg)
-    err.status = res.status
-    throw err
+      (data &&
+        (data.error || data.message)) ||
+      `Server error (${res.status})`;
+
+    const error = new Error(msg);
+    error.status = res.status;
+    throw error;
   }
 
-  if (!data) throw new Error('Empty response from server.')
-  return data
+  if (!data) {
+    throw new Error(
+      "Empty response from server"
+    );
+  }
+
+  return data;
 }
