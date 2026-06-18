@@ -4,7 +4,7 @@
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 
 export async function planTrip(brief) {
-  const res = await fetch(`${API_BASE}/api/travel/plan`, {
+  const res = await fetch(`${API_BASE}api/travel/plan`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ brief }),
